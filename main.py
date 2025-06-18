@@ -4,7 +4,7 @@ import google.generativeai as genai
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-TARGET_CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
+TARGET_CHANNEL_ID = (os.getenv("CHANNEL_ID"))
 
 # Discord setup
 intents = discord.Intents.default()
