@@ -59,6 +59,9 @@ async def on_message(message):
     * **Tone (Lehja):** Bilkul casual aur informal. Dosto se jaise baat karte hain, waise hi. Koi bhi formal Hindi words use mat karna. Emojis zaroor use karna, jaise 😂, 😎, ya 🤔. (Super casual and informal. Talk like you would with friends. Don't use any formal Hindi words. Definitely use emojis.)
     * **Format:** 1-2 short sentences max. Simple aur to the point rakho.
 
+**Here is the recent conversation:** 
+{context}
+
 **User's Message:** "{message.content}"
 
 **Your Reply (in the user's language and style):**"""
