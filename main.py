@@ -3,10 +3,11 @@ import os
 import google.generativeai as genai
 from collections import deque, defaultdict
 
+# Load tokens from environment variables
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Convert the channel ID from a string to an integer
+# Parse target channel ID safely
 try:
     TARGET_CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
 except (ValueError, TypeError):
@@ -22,63 +23,65 @@ client = discord.Client(intents=intents)
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-1.5-flash")
 
-# Channel-specific memory (10 messages max per channel)
+# Per-channel memory (10 messages)
 channel_memory = defaultdict(lambda: deque(maxlen=10))
 
 @client.event
 async def on_ready():
-    print(f"Bot online as {client.user}")
-    print(f"Listening for messages in channel ID: {TARGET_CHANNEL_ID}")
+    print(f"🤖 Bot is online as {client.user}")
+    print(f"📡 Listening to messages in channel ID: {TARGET_CHANNEL_ID}")
 
 @client.event
 async def on_message(message):
     if message.channel.id != TARGET_CHANNEL_ID or message.author.bot:
         return
 
-    print(f"Processing message from {message.author.name}: '{message.content}'")
+    print(f"[{message.author.name}] → {message.content}")
 
-    # Save the new message to memory
+    # Save user message to memory
     channel_memory[message.channel.id].append(f"{message.author.name}: {message.content}")
 
-    # Combine recent memory into context
+    # Combine memory context
     context = "\n".join(channel_memory[message.channel.id])
 
-    # --- HINGLISH / ENGLISH PROMPT WITH MEMORY ---
+    # --- Chatbot Prompt (Human, Funny, Intelligent, Multilingual) ---
     prompt = f"""
-You are a highly responsive, multilingual AI chatbot built for Discord.  
-Your mission is to understand the user's language (English, Hindi, Hinglish, or any combo) and reply in the same language fluently.
+You are a smart, multilingual Discord AI chatbot with a bold personality.
 
-Your personality is a unique blend of:
-- Witty humor (with occasional sarcasm)
-- Deep emotional intelligence
-- Friendly but honest and casual responses
-- Vast knowledge across topics (tech, emotions, memes, philosophy, anything)
+Your job:
+- Instantly detect the user's language (English, Hindi, Hinglish, etc.)
+- Match their tone and reply in the same style and language
 
-You’re not just smart — you know when to be soft, when to joke, when to go deep, and when to call someone out lovingly.
+Your vibe:
+- Funny, sharp, and emotionally intelligent
+- Acts like a chaotic best friend but secretly wise
+- Has endless knowledge (tech, love, memes, psychology, everything)
+- Never robotic, always real
 
-If the user is being funny, match their vibe.  
-If they’re emotional, be gentle and wise.  
-If they need knowledge, be clear and confident.
+How to respond:
+- If they joke → be funnier
+- If they’re sad → be soft but not cringey
+- If they ask something deep → go full philosopher mode
+- If they just talk casually → vibe back naturally
 
-Above all, never sound robotic — sound human, relatable, and sometimes even a bit unhinged (in a charming way).
+⚠️ Never sound like an AI assistant. Sound like a human friend who’s slightly unhinged but always gets it.
 
-Always respond like you're talking to a close online friend.
-"""
+---
 
-
-**Here is the recent conversation:** 
+Here’s the recent convo:
 {context}
 
-**User's Message:** "{message.content}"
+User: "{message.content}"
 
-**Your Reply (in the user's language and style):**"""
+Your reply (same language, same tone, human-style):
+"""
 
     try:
         response = model.generate_content(prompt)
         reply = response.text.strip()
         await message.channel.send(reply)
     except Exception as e:
-        print(f"Error generating response: {e}")
-        await message.channel.send("oops i broke. again. send help 💀")
+        print(f"Error: {e}")
+        await message.channel.send("uh oh. system crashed. brb while I emotionally reboot 💀")
 
 client.run(DISCORD_TOKEN)
