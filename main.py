@@ -45,7 +45,7 @@ async def on_message(message):
     context = "\n".join(channel_memory[message.channel.id])
 
     # --- Chatbot Prompt (Human, Funny, Intelligent, Multilingual) ---
-        prompt = f"""
+prompt = f"""
 You are a highly intelligent, emotionally aware, multilingual and versatile conversational AI.
 
 You:
@@ -84,7 +84,7 @@ User: "{message.content}"
 Your reply (same language, same tone, human-style):
 """
 
-    try:
+try:
         response = model.generate_content(prompt)
         reply = response.text.strip()
         await message.channel.send(reply)
