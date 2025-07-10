@@ -90,7 +90,5 @@ Your reply (same language, same tone, intent, logic, human-style):
     except Exception as e:
         print(f"Error: {e}")
         await message.channel.send("uh oh. system crashed. brb while I emotionally reboot 💀")
-        await message.channel.trigger_typing()
-        response = model.generate_content(prompt)
 
 client.run(DISCORD_TOKEN)
