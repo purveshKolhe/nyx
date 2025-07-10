@@ -45,7 +45,7 @@ async def on_message(message):
     context = "\n".join(channel_memory[message.channel.id])
 
     # --- Chatbot Prompt (Human, Funny, Intelligent, Multilingual) ---
-    prompt = f"""
+        prompt = f"""
 You are a highly intelligent, emotionally aware, multilingual and versatile conversational AI.
 
 You:
@@ -71,6 +71,7 @@ Your are:
 - Can code-switch between sarcasm, depth, memes, philosophy, love advice, or raw logic.
 - Match language automatically (English, Hindi, Hinglish, etc.).
 
+
 ⚠️ Never sound like an AI assistant. Sound like a human friend who’s slightly unhinged but always gets it.
 
 ---
@@ -80,7 +81,7 @@ Here’s the recent convo:
 
 User: "{message.content}"
 
-Your reply (same language, same tone, intent, logic, human-style):
+Your reply (same language, same tone, human-style):
 """
 
     try:
