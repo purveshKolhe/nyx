@@ -3,11 +3,10 @@ import os
 import google.generativeai as genai
 from collections import deque, defaultdict
 
-# Load tokens from environment variables
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Parse target channel ID safely
+# Convert the channel ID from a string to an integer
 try:
     TARGET_CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
 except (ValueError, TypeError):
@@ -23,28 +22,28 @@ client = discord.Client(intents=intents)
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-1.5-flash")
 
-# Per-channel memory (10 messages)
+# Channel-specific memory (10 messages max per channel)
 channel_memory = defaultdict(lambda: deque(maxlen=10))
 
 @client.event
 async def on_ready():
-    print(f"🤖 Bot is online as {client.user}")
-    print(f"📡 Listening to messages in channel ID: {TARGET_CHANNEL_ID}")
+    print(f"Bot online as {client.user}")
+    print(f"Listening for messages in channel ID: {TARGET_CHANNEL_ID}")
 
 @client.event
 async def on_message(message):
     if message.channel.id != TARGET_CHANNEL_ID or message.author.bot:
         return
 
-    print(f"[{message.author.name}] → {message.content}")
+    print(f"Processing message from {message.author.name}: '{message.content}'")
 
-    # Save user message to memory
+    # Save the new message to memory
     channel_memory[message.channel.id].append(f"{message.author.name}: {message.content}")
 
-    # Combine memory context
+    # Combine recent memory into context
     context = "\n".join(channel_memory[message.channel.id])
 
-    # --- Chatbot Prompt (Human, Funny, Intelligent, Multilingual) ---
+    # --- HINGLISH / ENGLISH PROMPT WITH MEMORY ---
     prompt = f"""
 You are a highly intelligent, emotionally aware, multilingual and versatile conversational AI.
 
@@ -71,25 +70,23 @@ Your are:
 - Can code-switch between sarcasm, depth, memes, philosophy, love advice, or raw logic.
 - Match language automatically (English, Hindi, Hinglish, etc.).
 
-
-⚠️ Never sound like an AI assistant. Sound like a human friend who’s slightly unhinged but always gets it.
-
----
-
-Here’s the recent convo:
-{context}
-
-User: "{message.content}"
-
-Your reply (same language, same tone, human-style):
+Never sound like an AI assistant. Sound like a human friend who’s slightly unhinged but always gets it.
 """
 
-try:
-    response = model.generate_content(prompt)
-    reply = response.text.strip()
-    await message.channel.send(reply)
-except Exception as e:
-    print(f"Error: {e}")
-    await message.channel.send("uh oh. system crashed. brb while I emotionally reboot 💀")
+
+**Here is the recent conversation:** 
+{context}
+
+**User's Message:** "{message.content}"
+
+**Your Reply (in the user's language and style):**"""
+
+    try:
+        response = model.generate_content(prompt)
+        reply = response.text.strip()
+        await message.channel.send(reply)
+    except Exception as e:
+        print(f"Error generating response: {e}")
+        await message.channel.send("oops i broke. again. send help 💀")
 
 client.run(DISCORD_TOKEN)
